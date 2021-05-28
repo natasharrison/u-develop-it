@@ -3,7 +3,6 @@ const router = express.Router();
 const db = require('../../db/connection');
 const inputCheck = require('../../utils/inputCheck');
 
-// originally app.get('/api/candidates')
 // get all candidates
 router.get('/candidates', (req, res) => {
 const sql = `SELECT candidates.*, parties.name
@@ -24,7 +23,6 @@ const sql = `SELECT candidates.*, parties.name
   });
 });
 
-// originally app.get('/api/candidate/:id')
 // get a single candidate
 router.get('/candidate/:id', (req, res) => {
     const sql = `SELECT candidates.*, parties.name
@@ -48,7 +46,6 @@ router.get('/candidate/:id', (req, res) => {
   });
 });
 
-// originally app.post('/api/candidate')
 // create a candidate
 router.post('/candidate', ({ body }, res) => {
   const errors = inputCheck(body, 'first_name', 'last_name', 'industry_connected');
@@ -56,9 +53,10 @@ router.post('/candidate', ({ body }, res) => {
     res.status(400).json({ error: errors });
     return;
   }
-  const sql = `INSERT INTO candidates (first_name, last_name, industry_connected)
+
+  const sql = `INSERT INTO candidates (first_name, last_name, industry_connected, party_id)
   VALUES (?,?,?)`;
-  const params = [body.first_name, body.last_name, body.industry_connected];
+  const params = [body.first_name, body.last_name, body.industry_connected, body.party_id];
 
   db.query(sql, params, (err, result) => {
     if (err) {
@@ -72,18 +70,18 @@ router.post('/candidate', ({ body }, res) => {
   });
 });
 
-// originally app.put('/api/candidate/:id')
 // update a candidate's party
 router.put('/candidate/:id', (req, res) => {
   const errors = inputCheck(req.body, 'party_id');
-
   if (errors) {
     res.status(400).json({ error: errors });
     return;
   }
+
   const sql = `UPDATE candidates SET party_id = ? 
                WHERE id = ?`;
   const params = [req.body.party_id, req.params.id];
+  
   db.query(sql, params, (err, result) => {
     if (err) {
       res.status(400).json({ error: err.message });
@@ -102,7 +100,6 @@ router.put('/candidate/:id', (req, res) => {
   });
 });
 
-// originally app.delete('/api/candidate/:id')
 // delete a candidate
 router.delete('/candidate/:id', (req, res) => {
   const sql = `DELETE FROM candidates WHERE id = ?`;
